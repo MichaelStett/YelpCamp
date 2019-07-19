@@ -2,8 +2,8 @@ const express = require('express');
 const parser = require('body-parser');
 const app = express();
 
-const PORT = 3000;
-const HOST = '127.0.0.1';
+const PORT = 8080;
+const HOST = '0.0.0.0';
 
 var campgrounds = [
     { name: "Salomon Creek", image: "https://live.staticflickr.com/5542/11936566655_2535c3606a_k.jpg" },
