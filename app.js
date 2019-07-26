@@ -15,7 +15,8 @@ mongoose.connect("mongodb://mongo:27017/yelp_camp");
 
 const campgroundSchema = new mongoose.Schema({
     name: String,
-    image: String
+    image: String,
+    description: String
 });
 
 const Campground = mongoose.model("Campground", campgroundSchema);
@@ -31,7 +32,7 @@ app.get('/campgrounds', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            res.render("campgrounds", {
+            res.render("index", {
                 campgrounds: all
             })
         }
@@ -41,10 +42,12 @@ app.get('/campgrounds', (req, res) => {
 app.post('/campgrounds', (req, res) => {
     const name = req.body.name;
     const image = req.body.image;
+    const description = req.body.description;
 
     Campground.create({
         name: name,
-        image: image
+        image: image,
+        description: description
     }, (err, obj) => {
         if (err) {
             console.log(err);
@@ -58,6 +61,18 @@ app.post('/campgrounds', (req, res) => {
 
 app.get('/campgrounds/new', (req, res) => {
     res.render('new');
+});
+
+app.get("/campgrounds/:id", (req, res) => {
+    Campground.findById(req.params.id, (err, obj) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render("show", {
+                campground: obj
+            });
+        }
+    });
 });
 
 app.get('*', (req, res) => {
