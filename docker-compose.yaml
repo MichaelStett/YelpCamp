@@ -12,10 +12,8 @@ services:
       - mongo
 
   mongo:
-    container_name: mongoDB
+    container_name: mongo
     image: mongo:latest
-    volumes:
-      - /var/lib/mongodb:/data/db
     ports:
       - "27017:27017"
     command: mongod --port 27017
