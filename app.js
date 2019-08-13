@@ -1,27 +1,25 @@
 const express = require('express'),
     parser = require('body-parser'),
     mongoose = require('mongoose'),
-    app = express();
+    app = express(),
+    Campground = require("./models/campground"),
+    Comment = require("./models/comment"),
+    SeedDB = require("./seed");
 
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
+SeedDB()
+
 app.use(parser.urlencoded({
     extended: true
 }));
+
 app.set('view engine', 'ejs');
 
-mongoose.connect("mongodb://mongo:27017/yelp_camp");
-
-const campgroundSchema = new mongoose.Schema({
-    name: String,
-    image: String,
-    description: String
+mongoose.connect("mongodb://mongo:27017/yelp_camp", {
+    useNewUrlParser: true
 });
-
-const Campground = mongoose.model("Campground", campgroundSchema);
-
-
 
 app.get('/', (req, res) => {
     res.render('landing');
@@ -32,7 +30,7 @@ app.get('/campgrounds', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            res.render("index", {
+            res.render("campgrounds/index", {
                 campgrounds: all
             })
         }
@@ -60,19 +58,52 @@ app.post('/campgrounds', (req, res) => {
 });
 
 app.get('/campgrounds/new', (req, res) => {
-    res.render('new');
+    res.render('campgrounds/new');
 });
 
 app.get("/campgrounds/:id", (req, res) => {
-    Campground.findById(req.params.id, (err, obj) => {
+    Campground.findById(req.params.id).populate("comments").exec((err, obj) => {
         if (err) {
             console.log(err);
         } else {
-            res.render("show", {
+            res.render("campgrounds/show", {
                 campground: obj
             });
         }
     });
+});
+
+// COMMENTS
+app.get("/campgrounds/:id/comments/new", (req, res) => {
+    Campground.findById(req.params.id, (err, obj) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render("comments/new", {
+                campground: obj
+            });
+        }
+    })
+});
+
+
+app.post('/campgrounds/:id/comments', (req, res) => {
+    Campground.findById(req.params.id, (err, campground) => {
+        if (err) {
+            console.log(err);
+            res.redirect("/campgrounds")
+        } else {
+            Comment.create(req.body, (err, comment) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    campground.comments.push(comment)
+                    campground.save()
+                    res.redirect(`/campgrounds/${campground._id}`)
+                }
+            })
+        }
+    })
 });
 
 app.get('*', (req, res) => {

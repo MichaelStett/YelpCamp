@@ -3,3 +3,4 @@
 !models/
 !app.js
 !package.json
+!seed.js
